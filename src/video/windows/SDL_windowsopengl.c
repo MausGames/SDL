@@ -412,6 +412,7 @@ void WIN_GL_InitExtensions(SDL_VideoDevice *_this)
 {
     /* *INDENT-OFF* */ /* clang-format off */
     const char *(WINAPI * wglGetExtensionsStringARB)(HDC) = 0;
+    const char *(WINAPI * wglGetExtensionsStringEXT) () = 0;
     /* *INDENT-ON* */ /* clang-format on */
     const char *extensions;
     HWND hwnd;
@@ -450,7 +451,15 @@ void WIN_GL_InitExtensions(SDL_VideoDevice *_this)
     if (wglGetExtensionsStringARB) {
         extensions = wglGetExtensionsStringARB(hdc);
     } else {
-        extensions = NULL;
+        /* *INDENT-OFF* */ /* clang-format off */
+        wglGetExtensionsStringEXT = (const char *(WINAPI *) ())
+            _this->gl_data->wglGetProcAddress("wglGetExtensionsStringEXT");
+        /* *INDENT-ON* */ /* clang-format on */
+        if (wglGetExtensionsStringEXT) {
+            extensions = wglGetExtensionsStringEXT();
+        } else {
+            extensions = NULL;
+        }
     }
 
     /* Check for WGL_ARB_pixel_format */
